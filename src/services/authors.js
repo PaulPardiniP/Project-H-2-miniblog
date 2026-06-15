@@ -1,33 +1,37 @@
-let authors = [
-  { id: 1, name: 'Anahi Loisa', email: 'analoi@example.com', bio: 'Diseñadora de interiores' },
-  { id: 2, name: 'Jairo Palavecino', email: 'jairop@example.com', bio: 'Jardinero escolar' },
-  { id: 3, name: 'Ramón Diaz', email: 'ramond@example.com', bio: 'Peluquero masculino y femenino' }
-];
+const pool = require('../../db/pool');
 
-let nextId =4; 
-
-const getAll = () => authors;
-const getById = (id) => authors.find (a => a.id === parseInt(id));
-
-const create = (name, email, bio) => {
-  const newAuthor = { id: nextId++, name, email, bio };
-  authors.push(newAuthor);
-  return newAuthor;
+const getAll = async () => {
+  const result = await pool.query('SELECT * FROM authors');
+  return result.rows;
 };
 
-const update = (id, name, email, bio) => {
-  const index = authors.findIndex(author => author.id === parseInt(id));
-  if (index === -1) return null;
-  authors[index] = { ...authors[index], name, email, bio };
-  return authors[index];
+const getById = async (id) => {
+  const result = await pool.query('SELECT * FROM authors WHERE id = $1', [id]);
+  return result.rows[0];
 };
 
-const remove = (id) => {
-  const index = authors.findIndex(author => author.id === parseInt(id));
-  if (index === -1) return null;
-  const deleted = authors.splice(index, 1);
-  return deleted[0];
+const create = async (name, email, bio) => {
+  const result = await pool.query(
+    'INSERT INTO authors (name, email, bio) VALUES ($1, $2, $3) RETURNING *',
+    [name, email, bio]
+  );
+  return result.rows[0];
 };
- 
-module.exports= {getAll, getById, create, update, remove};
 
+const update = async (id, name, email, bio) => {
+  const result = await pool.query(
+    'UPDATE authors SET name=$1, email=$2, bio=$3 WHERE id=$4 RETURNING *',
+    [name, email, bio, id]
+  );
+  return result.rows[0];
+};
+
+const remove = async (id) => {
+  const result = await pool.query(
+    'DELETE FROM authors WHERE id=$1 RETURNING *',
+    [id]
+  );
+  return result.rows[0];
+};
+
+module.exports = { getAll, getById, create, update, remove };

@@ -8,3 +8,5 @@ const pool = new Pool ({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT
 });
+
+module.exports = pool;
