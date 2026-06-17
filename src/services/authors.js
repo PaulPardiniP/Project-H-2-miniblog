@@ -16,7 +16,7 @@ const create = async (name, email, bio) => {
     [name, email, bio]
   );
   return result.rows[0];
-};
+}; 
 
 const update = async (id, name, email, bio) => {
   const result = await pool.query(
