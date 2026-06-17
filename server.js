@@ -1,17 +1,22 @@
-require('dotenv').config(); 
-const express = require ('express');
-const app = express ();
+require('dotenv').config();
+const express = require('express');
+const app = express();
 
-app.use (express.json());
+app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-const authorsRouter = require('./src/routes/authors');
-app.use('/authors', authorsRouter);
-
+const authorsRouter = require('./src/routes/authors');  
 const postsRouter = require('./src/routes/posts');
+
+app.use('/authors', authorsRouter);
 app.use('/posts', postsRouter);
 
-app.listen (PORT, () => {
-    console.log (`Servidor corriendo en puerto ${PORT}`);
+const { errorHandler } = require('./src/middlewares/errorHandler');
+app.use(errorHandler);
+
+module.exports = app;
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });

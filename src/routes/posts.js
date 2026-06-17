@@ -1,66 +1,47 @@
 const express = require('express');
 const router = express.Router();
 const postsService = require('../services/posts');
+const { asyncHandler } = require('../middlewares/errorHandler');
+const { notFound, badRequest } = require('../helpers/errors');
+const { validatePost } = require('../validators/posts');
 
-router.get('/', async (req, res) => {
-  try {
-    const posts = await postsService.getAll();
-    res.json(posts);
-  } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+router.get('/', asyncHandler(async (req, res) => {
+  const posts = await postsService.getAll();
+  res.json(posts);
+}));
 
-router.get('/author/:authorId', async (req, res) => {
-  try {
-    const posts = await postsService.getByAuthorId(req.params.authorId);
-    res.json(posts);
-  } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+router.get('/author/:authorId', asyncHandler(async (req, res) => {
+  const posts = await postsService.getByAuthorId(req.params.authorId);
+  res.json(posts);
+}));
 
-router.get('/:id', async (req, res) => {
-  try {
-    const post = await postsService.getById(req.params.id);
-    if (!post) return res.status(404).json({ error: 'Post no encontrado' });
-    res.json(post);
-  } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+router.get('/:id', asyncHandler(async (req, res, next) => {
+  const post = await postsService.getById(req.params.id);
+  if (!post) return next(notFound('Post no encontrado'));
+  res.json(post);
+}));
 
-router.post('/', async (req, res) => {
-  try {
-    const { title, content, author_id, published } = req.body;
-    if (!title || !content || !author_id) return res.status(400).json({ error: 'title, content y author_id son obligatorios' });
-    const newPost = await postsService.create(title, content, author_id, published);
-    res.status(201).json(newPost);
-  } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+router.post('/', asyncHandler(async (req, res, next) => {
+  const { title, content, author_id, published } = req.body;
+  const error = validatePost(title, content, author_id);
+  if (error) return next(badRequest(error));
+  const newPost = await postsService.create(title, content, author_id, published);
+  res.status(201).json(newPost);
+}));
 
-router.put('/:id', async (req, res) => {
-  try {
-    const { title, content, author_id, published } = req.body;
-    if (!title || !content || !author_id) return res.status(400).json({ error: 'title, content y author_id son obligatorios' });
-    const post = await postsService.update(req.params.id, title, content, author_id, published);
-    if (!post) return res.status(404).json({ error: 'Post no encontrado' });
-    res.json(post);
-  } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+router.put('/:id', asyncHandler(async (req, res, next) => {
+  const { title, content, author_id, published } = req.body;
+  const error = validatePost(title, content, author_id);
+  if (error) return next(badRequest(error));
+  const post = await postsService.update(req.params.id, title, content, author_id, published);
+  if (!post) return next(notFound('Post no encontrado'));
+  res.json(post);
+}));
 
-router.delete('/:id', async (req, res) => {
-  try {
-    const post = await postsService.remove(req.params.id);
-    if (!post) return res.status(404).json({ error: 'Post no encontrado' });
-    res.status(204).send();
-  } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+router.delete('/:id', asyncHandler(async (req, res, next) => {
+  const post = await postsService.remove(req.params.id);
+  if (!post) return next(notFound('Post no encontrado'));
+  res.status(204).send();
+}));
 
 module.exports = router;
