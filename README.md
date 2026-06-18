@@ -1,18 +1,34 @@
 # MiniBlog API
 
-API REST desarrollada con Node.js, Express y PostgreSQL para gestionar autores y posts.
+API REST desarrollada con **Node.js**, **Express** y **PostgreSQL** para gestionar autores y publicaciones de un miniblog.
 
-El proyecto permite realizar operaciones CRUD sobre autores y publicaciones, usando una relación simple donde un autor puede tener muchos posts.
+El proyecto permite crear, leer, actualizar y eliminar autores y posts, utilizando una base de datos relacional desplegada en Railway.
 
-## Tecnologías
+---
+
+## Deploy
+
+API desplegada en Railway:
+
+```txt
+https://project-h-2-miniblog-production.up.railway.app
+```
+
+---
+
+## Tecnologías utilizadas
 
 * Node.js
 * Express
 * PostgreSQL
 * pg
+* dotenv
 * Jest
 * Supertest
+* Railway
 * OpenAPI
+
+---
 
 ## Estructura del proyecto
 
@@ -35,31 +51,24 @@ Project-H-2-miniblog/
 │   │   └── errorHandler.js
 │   └── helpers/
 │       └── errors.js
-├── tests/
+├── test/
 │   ├── authors.test.js
 │   └── posts.test.js
 ├── openapi.yaml
 ├── .env.example
 ├── .gitignore
 ├── package.json
-├── server.js
-└── README.md
+└── server.js
 ```
 
-## Requisitos
-
-Para ejecutar el proyecto localmente se necesita tener instalado:
-
-* Node.js
-* npm
-* PostgreSQL
+---
 
 ## Instalación local
 
 Clonar el repositorio:
 
 ```bash
-git clone URL_DE_TU_REPOSITORIO
+git clone URL_DEL_REPOSITORIO
 cd Project-H-2-miniblog
 ```
 
@@ -69,11 +78,24 @@ Instalar dependencias:
 npm install
 ```
 
+---
+
 ## Variables de entorno
 
-Crear un archivo `.env` en la raíz del proyecto usando como referencia `.env.example`.
+Crear un archivo `.env` en la raíz del proyecto tomando como referencia `.env.example`.
 
-Ejemplo:
+Ejemplo para conexión local o Railway:
+
+```env
+PORT=3000
+DB_HOST=host_de_postgres
+DB_USER=postgres
+DB_PASSWORD=password_de_postgres
+DB_NAME=railway
+DB_PORT=puerto_de_postgres
+```
+
+Archivo `.env.example`:
 
 ```env
 PORT=3000
@@ -81,94 +103,224 @@ DB_HOST=localhost
 DB_USER=postgres
 DB_PASSWORD=tu_password
 DB_NAME=miniblog
-DB_PORT=3001
+DB_PORT=5432
 ```
+
+> Importante: el archivo `.env` no debe subirse al repositorio.
+
+---
 
 ## Base de datos
 
-Ejecutar el script SQL para crear las tablas e insertar datos iniciales:
+El script de creación de tablas se encuentra en:
 
-```bash
-psql -U postgres -p 3001 -d miniblog -f db/setup.sql
+```txt
+db/setup.sql
 ```
 
-El archivo `setup.sql` crea las tablas `authors` y `posts`, junto con sus relaciones y datos de prueba.
+Este script crea las tablas:
+
+* `authors`
+* `posts`
+
+También inserta datos iniciales de prueba.
+
+Para ejecutar el script en PostgreSQL:
+
+```bash
+psql -h HOST -p PORT -U USER -d DATABASE -f db/setup.sql
+```
+
+O desde la consola de PostgreSQL:
+
+```sql
+\i ruta/del/proyecto/db/setup.sql
+```
+
+---
 
 ## Ejecutar el proyecto
 
-Iniciar el servidor:
+Para iniciar el servidor:
 
 ```bash
 npm start
 ```
 
-La API estará disponible en:
+Servidor local:
 
 ```txt
 http://localhost:3000
 ```
 
-## Ejecutar tests
+---
 
-Ejecutar las pruebas automatizadas:
+## Endpoints principales
+
+### Authors
+
+| Método | Endpoint       | Descripción               |
+| ------ | -------------- | ------------------------- |
+| GET    | `/authors`     | Obtener todos los autores |
+| GET    | `/authors/:id` | Obtener un autor por ID   |
+| POST   | `/authors`     | Crear un autor            |
+| PUT    | `/authors/:id` | Actualizar un autor       |
+| DELETE | `/authors/:id` | Eliminar un autor         |
+
+### Posts
+
+| Método | Endpoint                  | Descripción             |
+| ------ | ------------------------- | ----------------------- |
+| GET    | `/posts`                  | Obtener todos los posts |
+| GET    | `/posts/:id`              | Obtener un post por ID  |
+| POST   | `/posts`                  | Crear un post           |
+| PUT    | `/posts/:id`              | Actualizar un post      |
+| DELETE | `/posts/:id`              | Eliminar un post        |
+| GET    | `/posts/author/:authorId` | Obtener posts por autor |
+
+---
+
+## Ejemplos de uso
+
+### Obtener autores
+
+```bash
+curl https://project-h-2-miniblog-production.up.railway.app/authors
+```
+
+### Obtener posts
+
+```bash
+curl https://project-h-2-miniblog-production.up.railway.app/posts
+```
+
+### Crear un autor
+
+```bash
+curl -X POST https://project-h-2-miniblog-production.up.railway.app/authors \
+-H "Content-Type: application/json" \
+-d '{
+  "name": "Nuevo Autor",
+  "email": "nuevoautor@example.com",
+  "bio": "Biografía del autor"
+}'
+```
+
+### Crear un post
+
+```bash
+curl -X POST https://project-h-2-miniblog-production.up.railway.app/posts \
+-H "Content-Type: application/json" \
+-d '{
+  "title": "Nuevo post",
+  "content": "Contenido del nuevo post",
+  "published": true,
+  "author_id": 1
+}'
+```
+
+---
+
+## Validaciones
+
+El proyecto incluye validaciones para autores y posts.
+
+### Authors
+
+Campos requeridos:
+
+* `name`
+* `email`
+
+### Posts
+
+Campos requeridos:
+
+* `title`
+* `content`
+* `author_id`
+
+---
+
+## Manejo de errores
+
+La API utiliza un middleware centralizado para manejar errores.
+
+Ejemplos de errores controlados:
+
+* Autor no encontrado
+* Post no encontrado
+* Campos obligatorios faltantes
+* Error interno del servidor
+
+---
+
+## Tests
+
+El proyecto incluye tests con Jest y Supertest.
+
+Para ejecutar los tests:
 
 ```bash
 npm test
 ```
 
-Los tests fueron realizados con Jest y Supertest.
+Resultado esperado:
+
+```txt
+Test Suites: 2 passed
+Tests: 8 passed
+```
+
+---
 
 ## Documentación OpenAPI
 
-La documentación de la API se encuentra en el archivo:
+La documentación de la API se encuentra en:
 
 ```txt
 openapi.yaml
 ```
 
-Para visualizarla, se puede copiar el contenido del archivo y pegarlo en Swagger Editor:
+Este archivo describe los endpoints disponibles, parámetros, respuestas y esquemas principales.
+
+---
+
+## Deploy en Railway
+
+El proyecto fue desplegado en Railway junto con una base de datos PostgreSQL.
+
+Pasos realizados:
+
+1. Crear proyecto en Railway.
+2. Crear servicio PostgreSQL.
+3. Ejecutar el script `db/setup.sql` en la base de datos.
+4. Configurar variables de entorno en Railway.
+5. Desplegar la aplicación Express.
+6. Verificar los endpoints públicos.
+
+URL pública:
 
 ```txt
-https://editor.swagger.io/
+https://project-h-2-miniblog-production.up.railway.app
 ```
 
-## Deployment en Railway
+---
 
-El proyecto será desplegado en Railway conectando el repositorio de GitHub con un servicio de Node.js y una base de datos PostgreSQL.
+## Uso de inteligencia artificial
 
-Variables de entorno necesarias en Railway:
+Se utilizó inteligencia artificial como apoyo para:
 
-```env
-PORT=
-DB_HOST=
-DB_USER=
-DB_PASSWORD=
-DB_NAME=
-DB_PORT=
-```
+* Organizar la estructura del proyecto.
+* Revisar errores de conexión.
+* Mejorar documentación.
+* Verificar buenas prácticas generales.
+* Acompañar el proceso de deploy.
 
-URL pública de la API:
+El código fue revisado, adaptado y ejecutado manualmente durante el desarrollo del proyecto.
 
-```txt
-Pendiente
-```
+---
 
-Internal URL de PostgreSQL en Railway:
+## Autor
 
-```txt
-Pendiente
-```
-
-Cuando el deploy esté configurado, se debe reemplazar `Pendiente` por las URLs reales generadas por Railway.
-
-## Uso de IA
-
-Durante el desarrollo del proyecto se utilizó inteligencia artificial como apoyo para:
-
-* Revisar la estructura del proyecto.
-* Comprender el flujo entre rutas, servicios, validadores, middlewares y base de datos.
-* Corregir errores de configuración.
-* Completar la documentación OpenAPI.
-* Redactar y organizar el README.
-
-La IA fue utilizada como herramienta de asistencia y aprendizaje. El código fue probado, revisado y adaptado al proyecto MiniBlog.
+Proyecto desarrollado por Paul Pardini para el Proyecto Integrador de Soy Henry.
