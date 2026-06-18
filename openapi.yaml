@@ -1,0 +1,263 @@
+```yaml
+openapi: 3.0.0
+
+info:
+  title: MiniBlog API
+  description: API REST para gestionar autores y posts
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+
+paths:
+  /authors:
+    get:
+      summary: Listar todos los autores
+      responses:
+        '200':
+          description: Lista de autores obtenida correctamente
+        '500':
+          description: Error interno del servidor
+
+    post:
+      summary: Crear un autor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+              properties:
+                name:
+                  type: string
+                  example: Ana García
+                email:
+                  type: string
+                  example: ana@example.com
+                bio:
+                  type: string
+                  example: Desarrolladora full-stack apasionada por Node.js
+      responses:
+        '201':
+          description: Autor creado correctamente
+        '400':
+          description: Datos inválidos
+        '500':
+          description: Error interno del servidor
+
+  /authors/{id}:
+    get:
+      summary: Obtener un autor por id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Autor encontrado
+        '404':
+          description: Autor no encontrado
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar un autor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+              properties:
+                name:
+                  type: string
+                  example: Ana García Actualizada
+                email:
+                  type: string
+                  example: ana.actualizada@example.com
+                bio:
+                  type: string
+                  example: Bio actualizada del autor
+      responses:
+        '200':
+          description: Autor actualizado correctamente
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Autor no encontrado
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar un autor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Autor eliminado correctamente
+        '404':
+          description: Autor no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /posts:
+    get:
+      summary: Listar todos los posts
+      responses:
+        '200':
+          description: Lista de posts obtenida correctamente
+        '500':
+          description: Error interno del servidor
+
+    post:
+      summary: Crear un post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - author_id
+              properties:
+                title:
+                  type: string
+                  example: Introducción a Node.js
+                content:
+                  type: string
+                  example: Node.js es un runtime de JavaScript...
+                author_id:
+                  type: integer
+                  example: 1
+                published:
+                  type: boolean
+                  example: true
+      responses:
+        '201':
+          description: Post creado correctamente
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Autor no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /posts/{id}:
+    get:
+      summary: Obtener un post por id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Post encontrado
+        '404':
+          description: Post no encontrado
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar un post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - author_id
+              properties:
+                title:
+                  type: string
+                  example: Node.js actualizado
+                content:
+                  type: string
+                  example: Contenido actualizado del post
+                author_id:
+                  type: integer
+                  example: 1
+                published:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Post actualizado correctamente
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Post o autor no encontrado
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar un post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Post eliminado correctamente
+        '404':
+          description: Post no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /posts/author/{authorId}:
+    get:
+      summary: Listar posts de un autor con detalle del autor
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Lista de posts del autor obtenida correctamente
+        '404':
+          description: Autor no encontrado
+        '500':
+          description: Error interno del servidor
+```
