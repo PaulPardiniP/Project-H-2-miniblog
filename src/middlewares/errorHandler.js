@@ -1,24 +1,24 @@
-const errorHandler = (err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Error interno del servidor';
+function errorHandler(err, req, res, next) {
+  const statusCode = err.status || 500;
 
-  console.error('Error capturado:', {
+  console.error('Error real:', {
     status: statusCode,
-    message: message,
+    message: err.message,
+    code: err.code,
+    detail: err.detail,
+    stack: err.stack,
     path: req.path,
     method: req.method
   });
 
   res.status(statusCode).json({
-    error: message,
+    error: statusCode === 500 ? 'Error interno del servidor' : err.message,
     status: statusCode
   });
-};
+}
 
-const asyncHandler = (fn) => {
-  return (req, res, next) => {
-    fn(req, res, next).catch(next);
-  };
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 module.exports = { errorHandler, asyncHandler };
